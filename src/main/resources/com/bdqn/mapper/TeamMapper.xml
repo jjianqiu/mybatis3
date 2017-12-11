@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bdqn.mapper.TeamMapper">
+<!-- 
+		动态的标签
+		if  where  set  choose  when  otherwise   trim  
+		用于循环有一个foreach  
+		resultMap    mybatis 强大的结果映射集
+		resultMap  和 resultType 只能出现一个，不能巩固才能，更多的是使用resultMap
+		需要我们设计返回结果集 
+-->
+<resultMap id="baseMap" type="com.bdqn.bean.Team">
+	<id column="team_id" property="teamId"></id>
+	<result column="team_name" property="teamName"></result>
+	<result column="team_money" property="teamMoney"></result>
+</resultMap>
+
+<select id="selectAll" resultMap="baseMap">
+	select
+	<include refid="team_column"></include>
+	from team
+</select>
+<insert id="insert" >
+	insert into team
+	(team_id 
+	<if test="teamMoney != null">
+		,team_money
+	</if>
+	<if test="teamName != null">
+		,team_name
+	</if>
+	)
+	values (#{teamId}
+	<if test="teamMoney != null">
+		,#{teamMoney}
+	</if>
+	<if test="teamName != null">
+		,#{teamName}
+	</if>
+	)
+	
+</insert>
+<!--  foreach 这个标签用于循环迭代
+		collection: 集合（mybatis已经帮我们注册好了，虽然没有显示去写
+		但是mybatis的核心配置文件里面有大量的settings
+		open ：你整个这一块表达式以什么开头
+		close： 彼此之间使用什么分割
+ 		item：这个是集合迭代的一个表达式，用它可以提取传递进来的值
+		
+		#{id}:什么表达式？ OGNL表达式，阿帕奇研究的，Object Graphy
+				Navigator  Language
+				对象的语法导航语言
+				凡是对象的属性都可以在我们这个表达式里面直接通过点的方式获取
+			team.teamName
+			加入team有一个集合
+			index：表明下标  
+ -->
+<select id="selectByIds" resultType="com.bdqn.bean.Team">
+ 	select team_id teamId,team_name teamName,team_money teamMoney
+	from team 
+	where team_id in
+	<foreach collection="list" open="(" close=")" item="id" separator=",">
+		#{id}
+	</foreach>
+ </select>
+<select id="selecTive" resultType="com.bdqn.bean.Team">
+	select 
+	team_id teamId, team_name teamName,team_Money teamMoney
+	from team
+	<!-- where 标签会自动去除多余的and	-->
+	<where>
+		<if test="teamId != null">
+			or team_id = #{teamId}
+		</if>
+		<if test="teamName != null">
+			or team_name = #{teamName}
+		</if>
+		<if test="teamMoney != null">
+			or team_money = #{teamMoney}
+		</if>
+	</where>
+	<!-- 模糊查询的3种方式
+	 	1.使用${}这种写法，有个问题，虽然可以去拼接字符串，但是同时也会有可能有
+			SQL注入，并不安全
+		2. 使用bind标签，进行变量绑定
+		3.直接在外面写
+	-->
+</select>
+	<select id="selecTiveOne" resultType="com.bdqn.bean.Team">
+		select * 
+		from team
+		<where>
+			<choose>
+				<!-- 跟java里面的seitch 差不多，只能选一个-->
+				<when test="teamId != null">
+					team_id = #{teamId}
+				</when>
+				<when test="teamName != null">
+					team_name = #{teamName}
+				</when>
+				<when test="teamMoney != null">
+					team_money = #{teamMoney}
+				</when>
+				<otherwise>
+					1 = 1
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+	
+	<update id="update">
+		update team
+		<set>
+			<if test="teamName != null">
+				team_name = #{teamName},
+			</if>
+			<if test="teamMoney != null">
+				team_money = #{teamMoney},
+			</if>
+		</set>
+		<where>
+			<if test="teamId != null">
+				team_id = #{teamId}
+			</if>
+		</where>		
+	</update>
+<!--   trim 标签  本意是用来去除字符串的，但是表达含义不明确，不好用   -->
+	<update id="update2">
+		update team 
+		<trim prefix="set" prefixOverrides=",">
+			<if test="teamName ! = null">
+				team_name = #{teamName}
+			</if>
+			<if test="teamMoney != null">
+				team_money = #{teamMoney}
+			</if>
+			<where>
+				<if test="teamId != null">
+					team_id = #{teamId}
+				</if>
+			</where>
+		</trim>
+	</update>
+	<sql id="team_column">
+		team_id teamId,team_name teamName,team_money teamMoney			
+	</sql>
+
+</mapper>

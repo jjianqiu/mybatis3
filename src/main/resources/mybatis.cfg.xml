@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+<!-- 	development 搭配数据库的基础环境， environments 它可以配置多个，
+	    生产和测试可以任意切换
+-->
+ 
+	<settings>
+<!--		支持驼峰命名
+	team_name  teamName
+	统一用下划线，我们java里面就用驼峰
+ 
+	-->
+		<setting name="mapUnderscoreToCamelCase" value="true"></setting>
+	</settings>
+
+	 <environments default="development">
+    	<environment id="development">
+<!--     		事务管理采用JDBC -->
+	      <transactionManager type="JDBC"/>
+<!-- 	      	数据源的配置 -->
+	      <dataSource type="UNPOOLED">
+<!-- 	      	数据库连接信息    --> 
+	        <property name="driver" value="com.mysql.jdbc.Driver"/>
+	        <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+	        <property name="username" value="root"/>
+	        <property name="password" value="111111"/>
+	      </dataSource>
+    	</environment>
+  </environments>
+  <mappers>
+<!--  	统一将mapper.xml放在resouces指定包之下，一次性引入，无需一个个引入 。-->
+	<package name="com.bdqn.mapper"></package>
+  </mappers> 
+</configuration>
